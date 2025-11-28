@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Career Path - Youth Compass AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Your Personalized Career Path</h1>
+        
+        <div id="results-container">
+            <div class="path-section">
+                <h2 id="path-title">Loading...</h2>
+                <div id="careers-list"></div>
+                <div id="next-steps"></div>
+            </div>
+            
+            <div class="feedback-section">
+                <h3>Feedback & Refinement</h3>
+                <textarea id="feedback" placeholder="How accurate is this assessment? What would you change?"></textarea>
+                <button onclick="submitFeedback()">Refine Results</button>
+            </div>
+        </div>
+        
+        <button onclick="startOver()">Start New Assessment</button>
+    </div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

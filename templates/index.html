@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Youth Compass AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Youth Compass AI</h1>
+        <p>Discover your career path through AI-powered guidance</p>
+        
+        <div id="chat-container">
+            <div id="messages"></div>
+            <div class="input-group">
+                <input type="text" id="user-input" placeholder="Tell me about your interests...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+        
+        <div id="questions" style="display: none;">
+            <h3>Quick Questions:</h3>
+            <button onclick="askQuestion('What subjects do you enjoy most?')">Favorite Subjects</button>
+            <button onclick="askQuestion('What activities make you feel energized?')">Energizing Activities</button>
+            <button onclick="askQuestion('How do you like to spend your free time?')">Free Time</button>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
