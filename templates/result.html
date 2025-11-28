@@ -8,25 +8,100 @@
 </head>
 <body>
     <div class="container">
-        <h1>Your Personalized Career Path</h1>
+        <h1>{{ user_name }}, Here's Your Path!</h1>
         
-        <div id="results-container">
+        <div class="results-container">
+            <!-- Main Pathway Section -->
             <div class="path-section">
-                <h2 id="path-title">Loading...</h2>
-                <div id="careers-list"></div>
-                <div id="next-steps"></div>
+                <h2>{{ pathway_data.name }}</h2>
+                <p class="pathway-description">{{ pathway_data.description }}</p>
+                <p class="success-rate">Success Rate: {{ success_rate }}% (Updated in real-time)</p>
+                
+                <div class="steps-list">
+                    <h3>Your Next Steps:</h3>
+                    {% for step in pathway_data.steps %}
+                    <div class="step">{{ step }}</div>
+                    {% endfor %}
+                </div>
             </div>
             
+            <!-- Skills Profile Section -->
+            <div class="skills-section">
+                <h3>Your Transferable Skills Profile</h3>
+                <div class="skills-grid">
+                    {% for skill, score in pathway_data.skills_profile.items() %}
+                    <div class="skill-item">
+                        <span class="skill-name">{{ skill.replace('_', ' ').title() }}</span>
+                        <div class="skill-bar">
+                            <div class="skill-progress" style="width: {{ score }}%"></div>
+                        </div>
+                        <span class="skill-score">{{ score }}%</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Recommended Courses Section -->
+            <div class="courses-section">
+                <h3>Recommended Courses (Ranked by ROI)</h3>
+                {% for course in pathway_data.recommended_courses %}
+                <div class="course-item">
+                    <h4>{{ course.name }}</h4>
+                    <p>Cost: R{{ course.cost }} | Duration: {{ course.duration }} | ROI Score: {{ course.roi_score }}%</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Hidden Opportunities Section -->
+            <div class="opportunities-section">
+                <h3>Hidden Job Market Opportunities</h3>
+                {% for opp in pathway_data.hidden_opportunities %}
+                <div class="opportunity-item">
+                    <h4>{{ opp.title }}</h4>
+                    <p>Location: {{ opp.location }} | Source: {{ opp.source }}</p>
+                </div>
+                {% endfor %}
+                <a href="{{ url_for('opportunities') }}" class="button">View More Opportunities</a>
+            </div>
+            
+            <!-- Motivational Support -->
+            <div class="motivation-section">
+                <h3>Your Daily Motivation</h3>
+                <p class="motivation-text">{{ pathway_data.motivation }}</p>
+                <a href="{{ url_for('support') }}" class="button">Get Support & Connect</a>
+            </div>
+            
+            <!-- Peer Matching -->
+            <div class="peers-section">
+                <h3>Connect with Similar Youth</h3>
+                {% for match in pathway_data.peer_matches %}
+                <div class="peer-match">
+                    <p><strong>Match:</strong> {{ match.match_reason }}</p>
+                    <p><strong>Location:</strong> {{ match.location }} | <strong>Stage:</strong> {{ match.stage }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Enhanced Feedback Section -->
             <div class="feedback-section">
-                <h3>Feedback & Refinement</h3>
-                <textarea id="feedback" placeholder="How accurate is this assessment? What would you change?"></textarea>
-                <button onclick="submitFeedback()">Refine Results</button>
+                <h3>Help Us Improve (Your feedback trains our AI)</h3>
+                <p>Did this path resonate with you?</p>
+                
+                <form method="POST" action="{{ url_for('feedback') }}">
+                    <button type="submit" name="feedback_type" value="success" class="success-btn">Yes, this fits me!</button>
+                    <button type="submit" name="feedback_type" value="not_helpful" class="improve-btn">Needs improvement</button>
+                </form>
+                
+                <div class="pathway-scores">
+                    <h4>Your Interest Analysis:</h4>
+                    {% for pathway, score in scores.items() %}
+                    <div class="score-item">{{ pathway.title() }}: {{ score }} matches</div>
+                    {% endfor %}
+                </div>
+                
+                <a href="{{ url_for('start_profiler') }}" class="button">Start New Assessment</a>
             </div>
         </div>
-        
-        <button onclick="startOver()">Start New Assessment</button>
     </div>
-    
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

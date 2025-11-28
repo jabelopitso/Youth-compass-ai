@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Improving Recommendations - Youth Compass AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Thank You for Your Feedback!</h1>
+        
+        <div class="feedback-improve">
+            <p>Your feedback helps our AI learn and improve recommendations for future users.</p>
+            <p>We've noted that <strong>{{ pathway }}</strong> may need refinement.</p>
+            
+            <div class="improvement-actions">
+                <h3>What happens next?</h3>
+                <ul>
+                    <li>Our AI will analyze your feedback</li>
+                    <li>We'll adjust the pathway recommendations</li>
+                    <li>Future users will benefit from improved suggestions</li>
+                    <li>You can retake the assessment anytime</li>
+                </ul>
+            </div>
+            
+            <div class="alternative-options">
+                <h3>Explore Other Options</h3>
+                <a href="{{ url_for('opportunities') }}" class="button">View Hidden Opportunities</a>
+                <a href="{{ url_for('support') }}" class="button">Get Support & Guidance</a>
+                <a href="{{ url_for('start_profiler') }}" class="button">Retake Assessment</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

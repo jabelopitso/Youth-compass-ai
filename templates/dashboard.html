@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Journey Dashboard - Youth Compass AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+            color: #334155;
+        }
+        
+        .header {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 700;
+            font-size: 24px;
+            color: #0f172a;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .dashboard-header {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .dashboard-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 15px;
+        }
+        
+        .dashboard-subtitle {
+            font-size: 18px;
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+        
+        .completion-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        
+        .assessments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .assessment-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-left: 5px solid #3b82f6;
+        }
+        
+        .assessment-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .assessment-icon {
+            font-size: 32px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-radius: 12px;
+        }
+        
+        .assessment-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        
+        .assessment-analysis {
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .assessment-timestamp {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 15px;
+        }
+        
+        .next-steps {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        
+        .next-steps h4 {
+            color: #0f172a;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .next-steps ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .next-steps li {
+            padding: 5px 0;
+            color: #475569;
+            position: relative;
+            padding-left: 20px;
+            font-size: 14px;
+        }
+        
+        .next-steps li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #3b82f6;
+            font-weight: bold;
+        }
+        
+        .pathway-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .pathway-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .pathway-button {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 0 auto 30px;
+        }
+        
+        .pathway-timeline {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .timeline-item {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .timeline-period {
+            font-weight: 700;
+            color: #3b82f6;
+            margin-bottom: 15px;
+        }
+        
+        .timeline-goals {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .timeline-goals li {
+            padding: 5px 0;
+            color: #475569;
+            font-size: 14px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+        
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .empty-state p {
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+        
+        .start-button {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        @media (max-width: 768px) {
+            .assessments-grid { grid-template-columns: 1fr; }
+            .completion-stats { gap: 20px; }
+            .dashboard-title { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">
+                <span>🧭</span>
+                <span>Youth Compass AI</span>
+            </div>
+            <a href="/" style="color: #3b82f6; text-decoration: none; font-weight: 500;">← Back to Home</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">My Journey Dashboard</h1>
+            <p class="dashboard-subtitle">Track your progress across all areas of life development</p>
+            
+            <div class="completion-stats">
+                <div class="stat">
+                    <div class="stat-number">{{ assessments|length }}</div>
+                    <div class="stat-label">Areas Completed</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">{{ (assessments|length / 6 * 100)|round|int }}%</div>
+                    <div class="stat-label">Journey Progress</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">6</div>
+                    <div class="stat-label">Total Life Areas</div>
+                </div>
+            </div>
+        </div>
+
+        {% if assessments %}
+            <div class="assessments-grid">
+                {% for area, data in assessments.items() %}
+                <div class="assessment-card">
+                    <div class="assessment-header">
+                        <div class="assessment-icon">{{ life_areas[area].icon }}</div>
+                        <div class="assessment-title">{{ life_areas[area].name }}</div>
+                    </div>
+                    
+                    <div class="assessment-timestamp">
+                        Completed: {{ data.timestamp[:10] }}
+                    </div>
+                    
+                    <div class="assessment-analysis">
+                        {{ data.analysis }}
+                    </div>
+                    
+                    {% if data.next_steps %}
+                    <div class="next-steps">
+                        <h4>Your Next Steps:</h4>
+                        <ul>
+                            {% for step in data.next_steps %}
+                            <li>{{ step }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="pathway-section">
+                <h2 class="pathway-title">🗺️ Your Personalized Life Pathway</h2>
+                <button class="pathway-button" onclick="generatePathway()">Generate My Complete Pathway</button>
+                <div id="pathwayContent"></div>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <h3>🌟 Ready to Start Your Journey?</h3>
+                <p>Complete your first assessment to begin building your personalized life direction plan.</p>
+                <a href="/" class="start-button">Start My Journey</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        async function generatePathway() {
+            const pathwayContent = document.getElementById('pathwayContent');
+            pathwayContent.innerHTML = '<div style="text-align: center; padding: 20px;">🤖 Creating your personalized pathway...</div>';
+
+            try {
+                const response = await fetch('/pathway');
+                const data = await response.json();
+
+                if (data.pathway) {
+                    let html = '<div class="pathway-timeline">';
+                    
+                    Object.entries(data.pathway).forEach(([period, goals]) => {
+                        html += `
+                            <div class="timeline-item">
+                                <div class="timeline-period">${period.replace('_', ' ').toUpperCase()}</div>
+                                <ul class="timeline-goals">
+                                    ${goals.map(goal => `<li>• ${goal}</li>`).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    pathwayContent.innerHTML = html;
+                } else {
+                    pathwayContent.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">Complete more assessments to generate your pathway.</div>';
+                }
+            } catch (error) {
+                pathwayContent.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">Unable to generate pathway. Please try again.</div>';
+            }
+        }
+    </script>
+</body>
+</html>

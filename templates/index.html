@@ -11,22 +11,18 @@
         <h1>Youth Compass AI</h1>
         <p>Discover your career path through AI-powered guidance</p>
         
-        <div id="chat-container">
-            <div id="messages"></div>
-            <div class="input-group">
-                <input type="text" id="user-input" placeholder="Tell me about your interests...">
-                <button onclick="sendMessage()">Send</button>
-            </div>
-        </div>
-        
-        <div id="questions" style="display: none;">
-            <h3>Quick Questions:</h3>
-            <button onclick="askQuestion('What subjects do you enjoy most?')">Favorite Subjects</button>
-            <button onclick="askQuestion('What activities make you feel energized?')">Energizing Activities</button>
-            <button onclick="askQuestion('How do you like to spend your free time?')">Free Time</button>
+        <div class="start-container">
+            <h2>Welcome to Your Career Journey</h2>
+            <p>We'll ask you 5 questions to understand your interests and recommend the best career path for you.</p>
+            
+            <form method="POST">
+                <div class="input-group">
+                    <label for="user_name">What should we call you?</label>
+                    <input type="text" name="user_name" placeholder="Your name or initials" required>
+                </div>
+                <button type="submit">Start My Profile</button>
+            </form>
         </div>
     </div>
-    
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

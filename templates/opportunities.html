@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hidden Opportunities - Youth Compass AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Hidden Job Market Scanner</h1>
+        <p>Opportunities beyond traditional job boards</p>
+        
+        <div class="opportunities-grid">
+            {% for opp in opportunities %}
+            <div class="opportunity-card">
+                <h3>{{ opp.title }}</h3>
+                <p><strong>Location:</strong> {{ opp.location }}</p>
+                <p><strong>Source:</strong> {{ opp.source }}</p>
+                <p class="opportunity-desc">This opportunity was found through our AI scanner that monitors community networks, social media, and government tenders.</p>
+                <button class="apply-btn">Express Interest</button>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="scanner-info">
+            <h3>How Our Scanner Works</h3>
+            <ul>
+                <li>Monitors local SMME social media pages</li>
+                <li>Scans community notice boards</li>
+                <li>Tracks government tender opportunities</li>
+                <li>Analyzes informal sector networks</li>
+            </ul>
+        </div>
+        
+        <a href="{{ url_for('results') }}" class="button">Back to My Path</a>
+    </div>
+</body>
+</html>
