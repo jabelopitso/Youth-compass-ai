@@ -302,6 +302,142 @@ def find_peers():
         ]
     })
 
+@app.route('/chatbot', methods=['POST'])
+def chatbot():
+    """AI Chatbot for Questions and Support"""
+    data = request.json
+    message = data.get('message', '').lower()
+    
+    # AI responses based on keywords
+    if any(word in message for word in ['cv', 'resume']):
+        response = "I can help you create a strong CV! Focus on: 1) Clear contact details, 2) Skills summary, 3) Work experience (even informal), 4) Education, 5) References. Would you like specific tips for any section?"
+    
+    elif any(word in message for word in ['interview', 'job interview']):
+        response = "Great question about interviews! Key tips: 1) Research the company, 2) Practice common questions, 3) Prepare examples of your achievements, 4) Dress appropriately, 5) Ask thoughtful questions. What specific aspect would you like help with?"
+    
+    elif any(word in message for word in ['salary', 'negotiate', 'pay']):
+        response = "Salary negotiation is important! In South Africa: Entry-level positions typically range R8,000-R15,000/month. Research market rates, highlight your value, and don't be afraid to negotiate respectfully. What role are you considering?"
+    
+    elif any(word in message for word in ['skills', 'learn', 'course']):
+        response = "Skill development is key to career growth! Popular in-demand skills: Digital marketing, Data analysis, Programming, Project management. Free resources: Coursera, edX, FreeCodeCamp, Google Skillshop. What area interests you most?"
+    
+    elif any(word in message for word in ['business', 'entrepreneur', 'startup']):
+        response = "Starting a business in SA? Key steps: 1) Validate your idea, 2) Register with CIPC, 3) Get tax clearance, 4) Open business bank account, 5) Consider SEDA support. What type of business are you thinking about?"
+    
+    elif any(word in message for word in ['funding', 'loan', 'money']):
+        response = "Funding options for SA youth: 1) NYDA loans (up to R1M), 2) SEDA grants, 3) Provincial development agencies, 4) Crowdfunding, 5) Angel investors. What's your funding need and business stage?"
+    
+    elif any(word in message for word in ['tax', 'vat', 'sars']):
+        response = "Tax basics for entrepreneurs: Register for income tax immediately, VAT registration required at R1M+ turnover, keep all receipts, file returns on time. Use our VAT tracker to monitor your thresholds!"
+    
+    elif any(word in message for word in ['networking', 'connect', 'mentor']):
+        response = "Networking is crucial! Try: 1) LinkedIn groups, 2) Industry events, 3) Professional associations, 4) Alumni networks, 5) Our peer matching feature. What industry are you interested in?"
+    
+    elif any(word in message for word in ['stress', 'anxiety', 'overwhelmed']):
+        response = "It's normal to feel overwhelmed on your career journey. Remember: 1) Take small steps daily, 2) Celebrate progress, 3) Connect with supportive people, 4) Practice self-care, 5) Seek help when needed. You're not alone in this!"
+    
+    elif any(word in message for word in ['location', 'remote', 'work from home']):
+        response = "Remote work is growing in SA! Skills needed: Self-discipline, communication, tech literacy. Platforms: Remote Year, We Work Remotely, AngelList. Many companies now offer hybrid options. What type of remote work interests you?"
+    
+    else:
+        # General career guidance
+        responses = [
+            "That's a great question! Career success comes from continuous learning, networking, and persistence. What specific area would you like guidance on?",
+            "I'm here to help with your career journey! Whether it's skills development, job searching, or entrepreneurship - what's your main focus right now?",
+            "Every career path is unique. Focus on building skills, gaining experience, and staying adaptable. What's your biggest career challenge currently?"
+        ]
+        response = random.choice(responses)
+    
+    return jsonify({
+        'response': response,
+        'suggestions': [
+            'Tell me about CV writing',
+            'How do I prepare for interviews?',
+            'What skills should I learn?',
+            'Help with starting a business',
+            'Tax and VAT guidance'
+        ]
+    })
+
+@app.route('/vat_tracker', methods=['GET', 'POST'])
+def vat_tracker():
+    """VAT/Tax Threshold Tracker"""
+    if request.method == 'POST':
+        data = request.json
+        
+        # Store financial data
+        if 'financial_data' not in session:
+            session['financial_data'] = {
+                'monthly_income': [],
+                'annual_projection': 0,
+                'vat_registered': False,
+                'tax_registered': True
+            }
+        
+        monthly_income = float(data.get('monthly_income', 0))
+        session['financial_data']['monthly_income'].append({
+            'amount': monthly_income,
+            'month': datetime.now().strftime('%Y-%m'),
+            'date': datetime.now().isoformat()
+        })
+        
+        # Calculate projections
+        recent_months = session['financial_data']['monthly_income'][-6:]  # Last 6 months
+        avg_monthly = sum(m['amount'] for m in recent_months) / len(recent_months) if recent_months else 0
+        annual_projection = avg_monthly * 12
+        
+        session['financial_data']['annual_projection'] = annual_projection
+        session.modified = True
+        
+        # VAT and Tax Thresholds (2024 SA rates)
+        vat_threshold = 1000000  # R1M for VAT registration
+        provisional_tax_threshold = 1000  # R1000+ annual tax liability
+        
+        alerts = []
+        
+        # VAT Registration Alert
+        if annual_projection >= vat_threshold * 0.8:  # 80% of threshold
+            if annual_projection >= vat_threshold:
+                alerts.append({
+                    'type': 'critical',
+                    'title': 'VAT Registration Required!',
+                    'message': f'Your projected annual income (R{annual_projection:,.0f}) exceeds R1M. You must register for VAT within 21 days.',
+                    'action': 'Register for VAT immediately on SARS eFiling'
+                })
+            else:
+                alerts.append({
+                    'type': 'warning',
+                    'title': 'Approaching VAT Threshold',
+                    'message': f'Your projected income (R{annual_projection:,.0f}) is approaching the R1M VAT threshold.',
+                    'action': 'Prepare for VAT registration and start keeping detailed records'
+                })
+        
+        # Provisional Tax Alert
+        estimated_tax = max(0, (annual_projection - 87300) * 0.18)  # Basic tax calculation
+        if estimated_tax >= provisional_tax_threshold:
+            alerts.append({
+                'type': 'info',
+                'title': 'Provisional Tax Required',
+                'message': f'Estimated annual tax liability: R{estimated_tax:,.0f}. You need to pay provisional tax.',
+                'action': 'Register for provisional tax and make bi-annual payments'
+            })
+        
+        return jsonify({
+            'annual_projection': annual_projection,
+            'vat_threshold_percentage': (annual_projection / vat_threshold) * 100,
+            'alerts': alerts,
+            'recommendations': [
+                'Keep detailed records of all income and expenses',
+                'Set aside 15-20% of income for tax obligations',
+                'Consider consulting a tax practitioner',
+                'Use accounting software for better tracking'
+            ]
+        })
+    
+    # GET request - return current status
+    financial_data = session.get('financial_data', {})
+    return jsonify(financial_data)
+
 @app.route('/update_progress', methods=['POST'])
 def update_progress():
     """User Updates Progress"""
@@ -332,6 +468,11 @@ def update_progress():
         'reinforcement_learning': 'Your success helps train our AI to better help other youth!'
     })
 
+@app.route('/chat')
+def chat_page():
+    """AI Chatbot Page"""
+    return render_template('chatbot.html')
+
 @app.route('/dashboard')
 def dashboard():
     """User Dashboard"""
@@ -339,10 +480,11 @@ def dashboard():
                          user=session.get('user'),
                          skills_profile=session.get('skills_profile'),
                          pathway=session.get('recommended_pathway'),
-                         progress=session.get('progress_updates', []))
+                         progress=session.get('progress_updates', []),
+                         financial_data=session.get('financial_data', {}))
 
 if __name__ == '__main__':
     print("🧭 Youth Compass AI - Complete User Flow")
-    print("📱 Access at: http://localhost:5000")
+    print("📱 Access at: http://localhost:5001")
     print("🔄 Following the complete user journey flow")
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5001)

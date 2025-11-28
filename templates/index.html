@@ -609,9 +609,14 @@
                     <!-- Peers will be displayed here -->
                 </div>
                 
-                <button class="btn" onclick="goToDashboard()">
-                    View My Dashboard 📊
-                </button>
+                <div class="action-buttons">
+                    <button class="btn" onclick="goToDashboard()">
+                        View My Dashboard 📊
+                    </button>
+                    <button class="btn btn-secondary" onclick="openChatbot()">
+                        Ask AI Assistant 🤖
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -934,6 +939,10 @@
         
         function goToDashboard() {
             window.location.href = '/dashboard';
+        }
+        
+        function openChatbot() {
+            window.open('/chat', '_blank', 'width=900,height=700,scrollbars=yes,resizable=yes');
         }
         
         // Initialize

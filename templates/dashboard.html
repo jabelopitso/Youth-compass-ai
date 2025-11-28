@@ -466,8 +466,58 @@
                     <div class="action-title">Learn</div>
                     <div class="action-desc">Recommended courses</div>
                 </div>
+                
+                <div class="action-item" onclick="openChatbot()">
+                    <div class="action-icon">🤖</div>
+                    <div class="action-title">AI Chat</div>
+                    <div class="action-desc">Ask career questions</div>
+                </div>
+                
+                <div class="action-item" onclick="openVATTracker()">
+                    <div class="action-icon">💰</div>
+                    <div class="action-title">VAT Tracker</div>
+                    <div class="action-desc">Monitor tax thresholds</div>
+                </div>
             </div>
         </div>
+        
+        <!-- Financial Tracking Section -->
+        {% if financial_data and financial_data.annual_projection %}
+        <div class="dashboard-card" style="grid-column: 1 / -1;">
+            <div class="card-header">
+                <div class="card-icon">💰</div>
+                <div class="card-title">Financial Tracking & VAT Status</div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0;">
+                <div style="background: #f8fafc; padding: 20px; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 700; color: #3b82f6;">R{{ "%.0f"|format(financial_data.annual_projection) }}</div>
+                    <div style="font-size: 14px; color: #6b7280;">Projected Annual Income</div>
+                </div>
+                
+                <div style="background: #f8fafc; padding: 20px; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 700; color: {% if (financial_data.annual_projection / 1000000 * 100) >= 80 %}#ef4444{% else %}#10b981{% endif %};">{{ "%.1f"|format(financial_data.annual_projection / 1000000 * 100) }}%</div>
+                    <div style="font-size: 14px; color: #6b7280;">of VAT Threshold</div>
+                </div>
+                
+                <div style="background: #f8fafc; padding: 20px; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 700; color: #f59e0b;">{{ financial_data.monthly_income|length }}</div>
+                    <div style="font-size: 14px; color: #6b7280;">Months Tracked</div>
+                </div>
+            </div>
+            
+            {% if financial_data.annual_projection >= 800000 %}
+            <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 15px; margin: 15px 0;">
+                <strong style="color: #92400e;">⚠️ VAT Threshold Alert</strong><br>
+                <span style="color: #78350f;">You're approaching the R1M VAT registration threshold. Consider preparing for VAT registration.</span>
+            </div>
+            {% endif %}
+            
+            <div class="action-buttons">
+                <button class="btn" onclick="openVATTracker()">Update Income & Check Thresholds</button>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Reinforcement Learning Impact -->
         <div class="reinforcement-learning">
@@ -527,6 +577,142 @@
         
         function learnSkills() {
             alert('Learning recommendations coming soon! This will suggest courses based on your career pathway.');
+        }
+        
+        function openChatbot() {
+            window.open('/chat', '_blank', 'width=900,height=700,scrollbars=yes,resizable=yes');
+        }
+        
+        function openVATTracker() {
+            // Open VAT Tracker in a popup window
+            const vatWindow = window.open('', 'VAT Tracker', 'width=600,height=700,scrollbars=yes,resizable=yes');
+            vatWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>VAT/Tax Threshold Tracker</title>
+                    <style>
+                        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #f8fafc; }
+                        .container { max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+                        h1 { color: #1f2937; margin-bottom: 20px; text-align: center; }
+                        .form-group { margin-bottom: 20px; }
+                        label { display: block; font-weight: 600; color: #374151; margin-bottom: 8px; }
+                        input { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; }
+                        input:focus { outline: none; border-color: #3b82f6; }
+                        .btn { background: #3b82f6; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; font-weight: 600; }
+                        .btn:hover { background: #2563eb; }
+                        .alert { padding: 15px; border-radius: 8px; margin: 15px 0; }
+                        .alert-critical { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+                        .alert-warning { background: #fffbeb; border: 1px solid #fed7aa; color: #92400e; }
+                        .alert-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+                        .progress-bar { width: 100%; height: 20px; background: #e5e7eb; border-radius: 10px; overflow: hidden; margin: 15px 0; }
+                        .progress-fill { height: 100%; background: linear-gradient(90deg, #10b981, #059669); transition: width 0.5s ease; }
+                        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+                        .stat { background: #f8fafc; padding: 15px; border-radius: 8px; text-align: center; }
+                        .stat-number { font-size: 20px; font-weight: 700; color: #3b82f6; }
+                        .stat-label { font-size: 12px; color: #6b7280; margin-top: 5px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h1>💰 VAT/Tax Threshold Tracker</h1>
+                        <p style="text-align: center; color: #6b7280; margin-bottom: 30px;">Track your income and get alerts before hitting tax thresholds</p>
+                        
+                        <div class="form-group">
+                            <label>Monthly Income (R)</label>
+                            <input type="number" id="monthlyIncome" placeholder="Enter your monthly income" min="0" step="100">
+                        </div>
+                        
+                        <button class="btn" onclick="trackIncome()">Update Income & Check Thresholds</button>
+                        
+                        <div id="results" style="margin-top: 30px;"></div>
+                        
+                        <div style="margin-top: 30px; padding: 20px; background: #f0f9ff; border-radius: 10px; border: 1px solid #bfdbfe;">
+                            <h3 style="color: #1e40af; margin-bottom: 15px;">📊 South African Tax Thresholds (2024)</h3>
+                            <ul style="color: #1e3a8a; padding-left: 20px;">
+                                <li><strong>VAT Registration:</strong> R1,000,000 annual turnover</li>
+                                <li><strong>Provisional Tax:</strong> R1,000+ annual tax liability</li>
+                                <li><strong>Income Tax Threshold:</strong> R95,750 (under 65)</li>
+                                <li><strong>Company Tax Rate:</strong> 27% (small business: 0-28%)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <script>
+                        async function trackIncome() {
+                            const monthlyIncome = document.getElementById('monthlyIncome').value;
+                            if (!monthlyIncome || monthlyIncome <= 0) {
+                                alert('Please enter a valid monthly income');
+                                return;
+                            }
+                            
+                            try {
+                                const response = await fetch('/vat_tracker', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({monthly_income: monthlyIncome})
+                                });
+                                
+                                const data = await response.json();
+                                displayResults(data);
+                            } catch (error) {
+                                alert('Error tracking income. Please try again.');
+                            }
+                        }
+                        
+                        function displayResults(data) {
+                            const resultsDiv = document.getElementById('results');
+                            
+                            let html = \`
+                                <div class="stats">
+                                    <div class="stat">
+                                        <div class="stat-number">R\${data.annual_projection.toLocaleString()}</div>
+                                        <div class="stat-label">Projected Annual Income</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="stat-number">\${data.vat_threshold_percentage.toFixed(1)}%</div>
+                                        <div class="stat-label">of VAT Threshold</div>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin: 20px 0;">
+                                    <label style="font-size: 14px; color: #6b7280;">Progress to VAT Threshold (R1,000,000)</label>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: \${Math.min(data.vat_threshold_percentage, 100)}%"></div>
+                                    </div>
+                                </div>
+                            \`;
+                            
+                            // Add alerts
+                            if (data.alerts && data.alerts.length > 0) {
+                                html += '<h3 style="color: #1f2937; margin: 20px 0 10px;">🚨 Threshold Alerts</h3>';
+                                data.alerts.forEach(alert => {
+                                    html += \`
+                                        <div class="alert alert-\${alert.type}">
+                                            <strong>\${alert.title}</strong><br>
+                                            \${alert.message}<br>
+                                            <em>Action: \${alert.action}</em>
+                                        </div>
+                                    \`;
+                                });
+                            }
+                            
+                            // Add recommendations
+                            if (data.recommendations && data.recommendations.length > 0) {
+                                html += '<h3 style="color: #1f2937; margin: 20px 0 10px;">💡 Recommendations</h3>';
+                                html += '<ul style="padding-left: 20px; color: #4b5563;">';
+                                data.recommendations.forEach(rec => {
+                                    html += \`<li style="margin: 5px 0;">\${rec}</li>\`;
+                                });
+                                html += '</ul>';
+                            }
+                            
+                            resultsDiv.innerHTML = html;
+                        }
+                    </script>
+                </body>
+                </html>
+            `);
         }
     </script>
 </body>

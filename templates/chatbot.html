@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Career Assistant - Youth Compass AI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            height: 700px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .chat-header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .chat-header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .quick-actions {
+            padding: 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .quick-actions h3 {
+            color: #374151;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            background: white;
+            border: 2px solid #e2e8f0;
+            color: #4b5563;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.user {
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .message.user .message-avatar {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .message.bot .message-avatar {
+            background: #10b981;
+            color: white;
+        }
+        
+        .message-content {
+            max-width: 75%;
+            padding: 15px 20px;
+            border-radius: 18px;
+            line-height: 1.6;
+        }
+        
+        .message.user .message-content {
+            background: #3b82f6;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.bot .message-content {
+            background: white;
+            color: #374151;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .suggestions {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .suggestions h4 {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .suggestion-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .suggestion-btn {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            color: #4b5563;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        
+        .suggestion-btn:hover {
+            background: #e5e7eb;
+            border-color: #9ca3af;
+        }
+        
+        .chat-input {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            resize: none;
+            min-height: 48px;
+            max-height: 120px;
+        }
+        
+        .message-input:focus {
+            border-color: #3b82f6;
+        }
+        
+        .send-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+        
+        .send-btn:hover {
+            background: #2563eb;
+            transform: scale(1.05);
+        }
+        
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .typing {
+            display: none;
+            color: #64748b;
+            font-style: italic;
+            padding: 10px 20px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .vat-tracker-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+            transition: all 0.2s;
+        }
+        
+        .vat-tracker-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+        }
+        
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .vat-tracker-btn {
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>🤖 AI Career Assistant</h1>
+            <p>Ask me anything about careers, skills, business, or life guidance</p>
+        </div>
+        
+        <div class="quick-actions">
+            <h3>💡 Quick Help Topics:</h3>
+            <div class="action-buttons">
+                <button class="action-btn" onclick="askQuestion('How do I write a good CV?')">CV Writing</button>
+                <button class="action-btn" onclick="askQuestion('Help me prepare for job interviews')">Interview Prep</button>
+                <button class="action-btn" onclick="askQuestion('What skills should I learn for my career?')">Skills Development</button>
+                <button class="action-btn" onclick="askQuestion('I want to start a business in South Africa')">Start Business</button>
+                <button class="action-btn" onclick="askQuestion('Tell me about tax and VAT for entrepreneurs')">Tax & VAT</button>
+                <button class="action-btn" onclick="askQuestion('How do I negotiate salary?')">Salary Tips</button>
+            </div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    Hi! I'm your AI Career Assistant. I'm here to help with:
+                    <br><br>
+                    🎯 <strong>Career Guidance</strong> - Job searching, career planning, industry insights
+                    <br>
+                    📄 <strong>CV & Interviews</strong> - Writing tips, interview preparation, salary negotiation
+                    <br>
+                    🚀 <strong>Entrepreneurship</strong> - Starting a business, funding, legal requirements
+                    <br>
+                    📚 <strong>Skills Development</strong> - Learning recommendations, course suggestions
+                    <br>
+                    💰 <strong>Financial Guidance</strong> - Tax advice, VAT thresholds, business finances
+                    <br>
+                    💪 <strong>Personal Support</strong> - Motivation, stress management, goal setting
+                    <br><br>
+                    What would you like to know about your career journey?
+                </div>
+            </div>
+        </div>
+        
+        <div class="typing" id="typing">AI is thinking...</div>
+        
+        <div class="chat-input">
+            <div class="input-group">
+                <textarea class="message-input" id="messageInput" placeholder="Ask me anything about your career..." rows="1" onkeypress="handleKeyPress(event)" oninput="autoResize(this)"></textarea>
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- VAT Tracker Button -->
+    <button class="vat-tracker-btn" onclick="openVATTracker()" title="VAT/Tax Threshold Tracker">💰</button>
+
+    <script>
+        function addMessage(content, isUser = false, suggestions = null) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = isUser ? '👤' : '🤖';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.innerHTML = content;
+            
+            // Add suggestions if provided
+            if (suggestions && suggestions.length > 0) {
+                const suggestionsDiv = document.createElement('div');
+                suggestionsDiv.className = 'suggestions';
+                suggestionsDiv.innerHTML = `
+                    <h4>💡 You might also ask:</h4>
+                    <div class="suggestion-buttons">
+                        ${suggestions.map(suggestion => 
+                            `<button class="suggestion-btn" onclick="askQuestion('${suggestion}')">${suggestion}</button>`
+                        ).join('')}
+                    </div>
+                `;
+                messageContent.appendChild(suggestionsDiv);
+            }
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function showTyping() {
+            document.getElementById('typing').style.display = 'block';
+            document.getElementById('sendBtn').disabled = true;
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+        }
+        
+        function hideTyping() {
+            document.getElementById('typing').style.display = 'none';
+            document.getElementById('sendBtn').disabled = false;
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addMessage(message, true);
+            input.value = '';
+            input.style.height = 'auto';
+            
+            showTyping();
+            
+            try {
+                const response = await fetch('/chatbot', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({message: message})
+                });
+                
+                const data = await response.json();
+                hideTyping();
+                
+                addMessage(data.response, false, data.suggestions);
+                
+            } catch (error) {
+                hideTyping();
+                addMessage('Sorry, I encountered an error. Please try again or rephrase your question.', false);
+            }
+        }
+        
+        function askQuestion(question) {
+            document.getElementById('messageInput').value = question;
+            sendMessage();
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+        
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+        
+        function openVATTracker() {
+            // Open VAT Tracker in a new window or modal
+            const vatWindow = window.open('', 'VAT Tracker', 'width=600,height=700,scrollbars=yes,resizable=yes');
+            vatWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>VAT/Tax Threshold Tracker</title>
+                    <style>
+                        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #f8fafc; }
+                        .container { max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+                        h1 { color: #1f2937; margin-bottom: 20px; text-align: center; }
+                        .form-group { margin-bottom: 20px; }
+                        label { display: block; font-weight: 600; color: #374151; margin-bottom: 8px; }
+                        input { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; }
+                        input:focus { outline: none; border-color: #3b82f6; }
+                        .btn { background: #3b82f6; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; font-weight: 600; }
+                        .btn:hover { background: #2563eb; }
+                        .alert { padding: 15px; border-radius: 8px; margin: 15px 0; }
+                        .alert-critical { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+                        .alert-warning { background: #fffbeb; border: 1px solid #fed7aa; color: #92400e; }
+                        .alert-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+                        .progress-bar { width: 100%; height: 20px; background: #e5e7eb; border-radius: 10px; overflow: hidden; margin: 15px 0; }
+                        .progress-fill { height: 100%; background: linear-gradient(90deg, #10b981, #059669); transition: width 0.5s ease; }
+                        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+                        .stat { background: #f8fafc; padding: 15px; border-radius: 8px; text-align: center; }
+                        .stat-number { font-size: 20px; font-weight: 700; color: #3b82f6; }
+                        .stat-label { font-size: 12px; color: #6b7280; margin-top: 5px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h1>💰 VAT/Tax Threshold Tracker</h1>
+                        <p style="text-align: center; color: #6b7280; margin-bottom: 30px;">Track your income and get alerts before hitting tax thresholds</p>
+                        
+                        <div class="form-group">
+                            <label>Monthly Income (R)</label>
+                            <input type="number" id="monthlyIncome" placeholder="Enter your monthly income" min="0" step="100">
+                        </div>
+                        
+                        <button class="btn" onclick="trackIncome()">Update Income & Check Thresholds</button>
+                        
+                        <div id="results" style="margin-top: 30px;"></div>
+                    </div>
+                    
+                    <script>
+                        async function trackIncome() {
+                            const monthlyIncome = document.getElementById('monthlyIncome').value;
+                            if (!monthlyIncome || monthlyIncome <= 0) {
+                                alert('Please enter a valid monthly income');
+                                return;
+                            }
+                            
+                            try {
+                                const response = await fetch('/vat_tracker', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({monthly_income: monthlyIncome})
+                                });
+                                
+                                const data = await response.json();
+                                displayResults(data);
+                            } catch (error) {
+                                alert('Error tracking income. Please try again.');
+                            }
+                        }
+                        
+                        function displayResults(data) {
+                            const resultsDiv = document.getElementById('results');
+                            
+                            let html = \`
+                                <div class="stats">
+                                    <div class="stat">
+                                        <div class="stat-number">R\${data.annual_projection.toLocaleString()}</div>
+                                        <div class="stat-label">Projected Annual Income</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="stat-number">\${data.vat_threshold_percentage.toFixed(1)}%</div>
+                                        <div class="stat-label">of VAT Threshold</div>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin: 20px 0;">
+                                    <label style="font-size: 14px; color: #6b7280;">Progress to VAT Threshold (R1,000,000)</label>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: \${Math.min(data.vat_threshold_percentage, 100)}%"></div>
+                                    </div>
+                                </div>
+                            \`;
+                            
+                            // Add alerts
+                            if (data.alerts && data.alerts.length > 0) {
+                                html += '<h3 style="color: #1f2937; margin: 20px 0 10px;">🚨 Threshold Alerts</h3>';
+                                data.alerts.forEach(alert => {
+                                    html += \`
+                                        <div class="alert alert-\${alert.type}">
+                                            <strong>\${alert.title}</strong><br>
+                                            \${alert.message}<br>
+                                            <em>Action: \${alert.action}</em>
+                                        </div>
+                                    \`;
+                                });
+                            }
+                            
+                            // Add recommendations
+                            if (data.recommendations && data.recommendations.length > 0) {
+                                html += '<h3 style="color: #1f2937; margin: 20px 0 10px;">💡 Recommendations</h3>';
+                                html += '<ul style="padding-left: 20px; color: #4b5563;">';
+                                data.recommendations.forEach(rec => {
+                                    html += \`<li style="margin: 5px 0;">\${rec}</li>\`;
+                                });
+                                html += '</ul>';
+                            }
+                            
+                            resultsDiv.innerHTML = html;
+                        }
+                    </script>
+                </body>
+                </html>
+            `);
+        }
+    </script>
+</body>
+</html>
