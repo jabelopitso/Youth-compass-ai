@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Journey Dashboard - Youth Compass AI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            color: #334155;
+            color: #333;
         }
         
         .header {
@@ -31,12 +31,9 @@
         }
         
         .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-weight: 700;
             font-size: 24px;
-            color: #0f172a;
+            font-weight: 700;
+            color: #1f2937;
         }
         
         .container {
@@ -49,28 +46,23 @@
             background: white;
             border-radius: 20px;
             padding: 40px;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             text-align: center;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
         
-        .dashboard-title {
-            font-size: 36px;
+        .welcome-message {
+            font-size: 32px;
             font-weight: 700;
-            color: #0f172a;
+            color: #1f2937;
             margin-bottom: 15px;
         }
         
-        .dashboard-subtitle {
-            font-size: 18px;
-            color: #64748b;
-            margin-bottom: 30px;
-        }
-        
-        .completion-stats {
+        .journey-stats {
             display: flex;
             justify-content: center;
             gap: 40px;
+            margin-top: 30px;
             flex-wrap: wrap;
         }
         
@@ -79,40 +71,38 @@
         }
         
         .stat-number {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 700;
             color: #3b82f6;
         }
         
         .stat-label {
             font-size: 14px;
-            color: #64748b;
+            color: #6b7280;
             margin-top: 5px;
         }
         
-        .assessments-grid {
+        .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 30px;
-            margin: 40px 0;
         }
         
-        .assessment-card {
+        .dashboard-card {
             background: white;
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            border-left: 5px solid #3b82f6;
         }
         
-        .assessment-header {
+        .card-header {
             display: flex;
             align-items: center;
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
-        .assessment-icon {
+        .card-icon {
             font-size: 32px;
             width: 60px;
             height: 60px;
@@ -123,261 +113,420 @@
             border-radius: 12px;
         }
         
-        .assessment-title {
+        .card-title {
             font-size: 20px;
             font-weight: 700;
-            color: #0f172a;
+            color: #1f2937;
         }
         
-        .assessment-analysis {
-            color: #475569;
-            line-height: 1.6;
-            margin-bottom: 20px;
+        .skills-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
         }
         
-        .assessment-timestamp {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-bottom: 15px;
-        }
-        
-        .next-steps {
+        .skill-mini {
             background: #f8fafc;
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
         }
         
-        .next-steps h4 {
-            color: #0f172a;
-            margin-bottom: 10px;
-            font-size: 16px;
+        .skill-mini-name {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 8px;
         }
         
-        .next-steps ul {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .next-steps li {
-            padding: 5px 0;
-            color: #475569;
-            position: relative;
-            padding-left: 20px;
-            font-size: 14px;
-        }
-        
-        .next-steps li::before {
-            content: '→';
-            position: absolute;
-            left: 0;
+        .skill-mini-score {
+            font-size: 18px;
+            font-weight: 700;
             color: #3b82f6;
+        }
+        
+        .pathway-summary {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #f59e0b;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .pathway-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+        
+        .pathway-success {
+            font-size: 24px;
+            color: #10b981;
+            font-weight: 700;
+            text-align: center;
+        }
+        
+        .progress-tracker {
+            margin: 25px 0;
+        }
+        
+        .progress-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        
+        .progress-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #10b981;
+            color: white;
             font-weight: bold;
         }
         
-        .pathway-section {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            margin: 40px 0;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        .progress-details {
+            flex: 1;
         }
         
-        .pathway-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 30px;
+        .progress-title {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .progress-date {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #3b82f6;
+            color: #3b82f6;
+        }
+        
+        .quick-actions {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border: 2px solid #10b981;
+            border-radius: 15px;
+            padding: 25px;
+        }
+        
+        .quick-actions h3 {
+            color: #065f46;
+            margin-bottom: 20px;
             text-align: center;
         }
         
-        .pathway-button {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 16px;
-            display: block;
-            margin: 0 auto 30px;
-        }
-        
-        .pathway-timeline {
+        .action-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
         }
         
-        .timeline-item {
-            background: #f8fafc;
-            padding: 25px;
-            border-radius: 12px;
-            border-left: 4px solid #3b82f6;
+        .action-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
         }
         
-        .timeline-period {
+        .action-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .action-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .action-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .action-desc {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .reinforcement-learning {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #f59e0b;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        
+        .rl-title {
             font-weight: 700;
-            color: #3b82f6;
-            margin-bottom: 15px;
+            color: #92400e;
+            margin-bottom: 10px;
         }
         
-        .timeline-goals {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .timeline-goals li {
-            padding: 5px 0;
-            color: #475569;
+        .rl-description {
+            color: #78350f;
             font-size: 14px;
         }
         
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #64748b;
-        }
-        
-        .empty-state h3 {
-            font-size: 24px;
-            margin-bottom: 15px;
-        }
-        
-        .empty-state p {
-            font-size: 16px;
-            margin-bottom: 30px;
-        }
-        
-        .start-button {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 16px;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
         @media (max-width: 768px) {
-            .assessments-grid { grid-template-columns: 1fr; }
-            .completion-stats { gap: 20px; }
-            .dashboard-title { font-size: 28px; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .journey-stats { gap: 20px; }
+            .action-buttons { flex-direction: column; }
         }
     </style>
 </head>
 <body>
     <header class="header">
         <nav class="nav">
-            <div class="logo">
-                <span>🧭</span>
-                <span>Youth Compass AI</span>
-            </div>
-            <a href="/" style="color: #3b82f6; text-decoration: none; font-weight: 500;">← Back to Home</a>
+            <div class="logo">🧭 Youth Compass AI</div>
+            <a href="/" style="color: #3b82f6; text-decoration: none; font-weight: 500;">← Start New Journey</a>
         </nav>
     </header>
 
     <div class="container">
         <div class="dashboard-header">
-            <h1 class="dashboard-title">My Journey Dashboard</h1>
-            <p class="dashboard-subtitle">Track your progress across all areas of life development</p>
+            <div class="welcome-message">
+                Welcome back, {{ user.name if user else 'Young Leader' }}! 🌟
+            </div>
+            <p style="color: #6b7280; font-size: 16px;">Your personalized career journey dashboard</p>
             
-            <div class="completion-stats">
+            <div class="journey-stats">
                 <div class="stat">
-                    <div class="stat-number">{{ assessments|length }}</div>
-                    <div class="stat-label">Areas Completed</div>
+                    <div class="stat-number">{{ progress|length }}</div>
+                    <div class="stat-label">Progress Updates</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-number">{{ (assessments|length / 6 * 100)|round|int }}%</div>
-                    <div class="stat-label">Journey Progress</div>
+                    <div class="stat-number">{{ user.age if user else '22' }}</div>
+                    <div class="stat-label">Age</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-number">6</div>
-                    <div class="stat-label">Total Life Areas</div>
+                    <div class="stat-number">{{ user.location if user else 'South Africa' }}</div>
+                    <div class="stat-label">Location</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">7</div>
+                    <div class="stat-label">Journey Steps Completed</div>
                 </div>
             </div>
         </div>
 
-        {% if assessments %}
-            <div class="assessments-grid">
-                {% for area, data in assessments.items() %}
-                <div class="assessment-card">
-                    <div class="assessment-header">
-                        <div class="assessment-icon">{{ life_areas[area].icon }}</div>
-                        <div class="assessment-title">{{ life_areas[area].name }}</div>
-                    </div>
-                    
-                    <div class="assessment-timestamp">
-                        Completed: {{ data.timestamp[:10] }}
-                    </div>
-                    
-                    <div class="assessment-analysis">
-                        {{ data.analysis }}
-                    </div>
-                    
-                    {% if data.next_steps %}
-                    <div class="next-steps">
-                        <h4>Your Next Steps:</h4>
-                        <ul>
-                            {% for step in data.next_steps %}
-                            <li>{{ step }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
+        <div class="dashboard-grid">
+            <!-- Skills Profile Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">🧠</div>
+                    <div class="card-title">My Skills Profile</div>
                 </div>
-                {% endfor %}
+                
+                {% if skills_profile %}
+                <div class="skills-overview">
+                    {% for skill, score in skills_profile.items() %}
+                    <div class="skill-mini">
+                        <div class="skill-mini-name">{{ skill.replace('_', ' ').title() }}</div>
+                        <div class="skill-mini-score">{{ score }}%</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p style="color: #6b7280; text-align: center; padding: 20px;">Complete your skills assessment to see your profile</p>
+                {% endif %}
+                
+                <div class="action-buttons">
+                    <button class="btn btn-outline" onclick="updateSkills()">Update Skills</button>
+                </div>
             </div>
 
-            <div class="pathway-section">
-                <h2 class="pathway-title">🗺️ Your Personalized Life Pathway</h2>
-                <button class="pathway-button" onclick="generatePathway()">Generate My Complete Pathway</button>
-                <div id="pathwayContent"></div>
+            <!-- Career Pathway Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">🎯</div>
+                    <div class="card-title">My Career Path</div>
+                </div>
+                
+                {% if pathway %}
+                <div class="pathway-summary">
+                    <div class="pathway-name">{{ pathway.data.name }}</div>
+                    <div style="color: #78350f; margin-bottom: 15px;">{{ pathway.data.description }}</div>
+                    <div class="pathway-success">{{ pathway.data.success_rate }}% Success Rate</div>
+                </div>
+                
+                <div style="margin: 15px 0;">
+                    <h4 style="color: #1f2937; margin-bottom: 10px;">🎯 Career Options:</h4>
+                    {% for career in pathway.data.careers[:3] %}
+                    <div style="padding: 5px 0; color: #4b5563;">• {{ career }}</div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p style="color: #6b7280; text-align: center; padding: 20px;">Complete your journey to see your recommended pathway</p>
+                {% endif %}
+                
+                <div class="action-buttons">
+                    <button class="btn" onclick="explorePathway()">Explore Pathway</button>
+                </div>
             </div>
-        {% else %}
-            <div class="empty-state">
-                <h3>🌟 Ready to Start Your Journey?</h3>
-                <p>Complete your first assessment to begin building your personalized life direction plan.</p>
-                <a href="/" class="start-button">Start My Journey</a>
+
+            <!-- Progress Tracker Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">📈</div>
+                    <div class="card-title">My Progress</div>
+                </div>
+                
+                <div class="progress-tracker">
+                    {% if progress %}
+                        {% for update in progress[-3:] %}
+                        <div class="progress-item">
+                            <div class="progress-icon">✓</div>
+                            <div class="progress-details">
+                                <div class="progress-title">{{ update.type.replace('_', ' ').title() }}</div>
+                                <div class="progress-date">{{ update.date[:10] }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div style="text-align: center; padding: 20px; color: #6b7280;">
+                            No progress updates yet. Start taking action on your pathway!
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="updateProgress()">Update Progress</button>
+                </div>
             </div>
-        {% endif %}
+        </div>
+
+        <!-- Quick Actions Section -->
+        <div class="quick-actions">
+            <h3>🚀 Quick Actions</h3>
+            <div class="action-grid">
+                <div class="action-item" onclick="findOpportunities()">
+                    <div class="action-icon">🔍</div>
+                    <div class="action-title">Find Jobs</div>
+                    <div class="action-desc">Scan hidden job market</div>
+                </div>
+                
+                <div class="action-item" onclick="getSupport()">
+                    <div class="action-icon">💪</div>
+                    <div class="action-title">Get Support</div>
+                    <div class="action-desc">AI wellness coaching</div>
+                </div>
+                
+                <div class="action-item" onclick="connectPeers()">
+                    <div class="action-icon">🤝</div>
+                    <div class="action-title">Connect</div>
+                    <div class="action-desc">Find peer matches</div>
+                </div>
+                
+                <div class="action-item" onclick="learnSkills()">
+                    <div class="action-icon">📚</div>
+                    <div class="action-title">Learn</div>
+                    <div class="action-desc">Recommended courses</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reinforcement Learning Impact -->
+        <div class="reinforcement-learning">
+            <div class="rl-title">🤖 AI Learning Impact</div>
+            <div class="rl-description">
+                Your progress updates help train our AI to provide better recommendations for other South African youth. 
+                Together, we're building a smarter system that improves career outcomes for everyone!
+            </div>
+        </div>
     </div>
 
     <script>
-        async function generatePathway() {
-            const pathwayContent = document.getElementById('pathwayContent');
-            pathwayContent.innerHTML = '<div style="text-align: center; padding: 20px;">🤖 Creating your personalized pathway...</div>';
-
-            try {
-                const response = await fetch('/pathway');
-                const data = await response.json();
-
-                if (data.pathway) {
-                    let html = '<div class="pathway-timeline">';
-                    
-                    Object.entries(data.pathway).forEach(([period, goals]) => {
-                        html += `
-                            <div class="timeline-item">
-                                <div class="timeline-period">${period.replace('_', ' ').toUpperCase()}</div>
-                                <ul class="timeline-goals">
-                                    ${goals.map(goal => `<li>• ${goal}</li>`).join('')}
-                                </ul>
-                            </div>
-                        `;
+        function updateSkills() {
+            alert('Skills update feature coming soon! This will allow you to retake the skills assessment.');
+        }
+        
+        function explorePathway() {
+            alert('Pathway explorer coming soon! This will show detailed career roadmaps and course recommendations.');
+        }
+        
+        async function updateProgress() {
+            const progressType = prompt('What progress would you like to update?\n\nOptions:\n- course_completed\n- job_applied\n- interview\n- hired\n\nEnter one of the above:');
+            
+            if (progressType) {
+                const details = prompt('Please provide details about this progress:');
+                
+                try {
+                    const response = await fetch('/update_progress', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            type: progressType,
+                            details: details
+                        })
                     });
                     
-                    html += '</div>';
-                    pathwayContent.innerHTML = html;
-                } else {
-                    pathwayContent.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">Complete more assessments to generate your pathway.</div>';
+                    const data = await response.json();
+                    alert(data.message);
+                    location.reload();
+                } catch (error) {
+                    alert('Error updating progress. Please try again.');
                 }
-            } catch (error) {
-                pathwayContent.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">Unable to generate pathway. Please try again.</div>';
             }
+        }
+        
+        function findOpportunities() {
+            alert('Job finder coming soon! This will scan the hidden job market for opportunities in your area.');
+        }
+        
+        function getSupport() {
+            alert('Wellness support coming soon! This will provide AI-powered mental health and motivation support.');
+        }
+        
+        function connectPeers() {
+            alert('Peer matching coming soon! This will connect you with other youth on similar career journeys.');
+        }
+        
+        function learnSkills() {
+            alert('Learning recommendations coming soon! This will suggest courses based on your career pathway.');
         }
     </script>
 </body>

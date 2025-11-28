@@ -1,180 +1,348 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
-from logic import analyze_profile, PATHWAYS_DATA, PATHWAY_KEYWORDS, update_pathway_success
-from ai_engine import ContextualProfiler, EconomicChoicesAI, SupportAI
+from flask import Flask, render_template, request, jsonify, session
+import json
 import os
+from datetime import datetime
+import random
 
 app = Flask(__name__)
-# Crucial for using sessions (like storing the answers across pages)
-app.secret_key = os.urandom(24) 
+app.secret_key = 'youth_compass_flow_2024'
 
-# --- Routes for the Profiler Flow ---
+# User Flow Data Structures
+USER_LEVELS = ['Matric', 'Some Tertiary', 'Diploma/Degree', 'No Formal Education']
 
-@app.route('/', methods=['GET', 'POST'])
-def start_profiler():
-    """Route 1: Handles the start screen and stores the user's name/initials."""
+PROVINCES = ['Gauteng', 'Western Cape', 'KwaZulu-Natal', 'Eastern Cape', 'Limpopo', 'Mpumalanga', 'North West', 'Free State', 'Northern Cape']
+
+# AI Coach Questions for First Chat
+COACH_QUESTIONS = [
+    "What activities make you feel energized and excited?",
+    "What are you naturally good at, even if it's just small things?",
+    "If you could solve one problem in your community, what would it be?",
+    "What do you do in your free time that you really enjoy?",
+    "What kind of work environment appeals to you most?"
+]
+
+# Skills Detection Keywords
+SKILLS_KEYWORDS = {
+    'communication': ['talking', 'explaining', 'helping others', 'teaching', 'presenting'],
+    'problem_solving': ['fixing', 'solving', 'figuring out', 'troubleshooting', 'organizing'],
+    'creativity': ['drawing', 'designing', 'creating', 'art', 'music', 'writing'],
+    'technology': ['computer', 'phone', 'apps', 'internet', 'social media', 'coding'],
+    'leadership': ['leading', 'organizing', 'managing', 'coordinating', 'responsible'],
+    'analytical': ['numbers', 'data', 'calculating', 'planning', 'researching'],
+    'hands_on': ['building', 'making', 'crafting', 'repairing', 'physical work'],
+    'sales': ['selling', 'convincing', 'persuading', 'negotiating', 'marketing']
+}
+
+# Career Pathways Database
+CAREER_PATHWAYS = {
+    'digital_economy': {
+        'name': 'Digital Economy Path',
+        'icon': '💻',
+        'description': 'Technology and digital skills for the modern economy',
+        'careers': ['Software Developer', 'Data Analyst', 'Digital Marketer', 'IT Support'],
+        'courses': [
+            {'name': 'Google Data Analytics Certificate', 'provider': 'Coursera', 'cost': 'Free', 'duration': '6 months'},
+            {'name': 'Python Programming', 'provider': 'FreeCodeCamp', 'cost': 'Free', 'duration': '3 months'},
+            {'name': 'Digital Marketing', 'provider': 'Google Skillshop', 'cost': 'Free', 'duration': '2 months'}
+        ],
+        'success_rate': 72
+    },
+    'green_economy': {
+        'name': 'Green Economy Path',
+        'icon': '🌱',
+        'description': 'Sustainable energy and environmental careers',
+        'careers': ['Solar Technician', 'Environmental Consultant', 'Renewable Energy Specialist'],
+        'courses': [
+            {'name': 'Solar PV Installation', 'provider': 'TVET College', 'cost': 'R8000', 'duration': '6 months'},
+            {'name': 'Environmental Management', 'provider': 'UNISA', 'cost': 'R15000', 'duration': '1 year'},
+            {'name': 'Green Building', 'provider': 'GBCSA', 'cost': 'R5000', 'duration': '3 months'}
+        ],
+        'success_rate': 68
+    },
+    'entrepreneurship': {
+        'name': 'Entrepreneurship Path',
+        'icon': '🚀',
+        'description': 'Start your own business and create opportunities',
+        'careers': ['Business Owner', 'Freelancer', 'Consultant', 'E-commerce Seller'],
+        'courses': [
+            {'name': 'Business Fundamentals', 'provider': 'SEDA', 'cost': 'Free', 'duration': '2 months'},
+            {'name': 'Financial Management', 'provider': 'MANCOSA', 'cost': 'Free', 'duration': '6 weeks'},
+            {'name': 'Digital Marketing', 'provider': 'Facebook Blueprint', 'cost': 'Free', 'duration': '4 weeks'}
+        ],
+        'success_rate': 75
+    },
+    'creative_industries': {
+        'name': 'Creative Industries Path',
+        'icon': '🎨',
+        'description': 'Arts, design, and creative expression careers',
+        'careers': ['Graphic Designer', 'Content Creator', 'Photographer', 'Writer'],
+        'courses': [
+            {'name': 'Graphic Design', 'provider': 'Adobe', 'cost': 'R500/month', 'duration': '4 months'},
+            {'name': 'Photography', 'provider': 'Local Studio', 'cost': 'R3000', 'duration': '2 months'},
+            {'name': 'Content Creation', 'provider': 'YouTube Creator Academy', 'cost': 'Free', 'duration': '6 weeks'}
+        ],
+        'success_rate': 65
+    }
+}
+
+# Hidden Job Market Sources (Simulated)
+HIDDEN_JOBS = [
+    {'title': 'Social Media Assistant', 'company': 'Local Restaurant', 'location': 'Johannesburg', 'source': 'Facebook Page'},
+    {'title': 'Delivery Driver', 'company': 'Pharmacy Chain', 'location': 'Cape Town', 'source': 'Community Notice'},
+    {'title': 'Tutor', 'company': 'Private Family', 'location': 'Durban', 'source': 'WhatsApp Group'},
+    {'title': 'Event Helper', 'company': 'Wedding Planner', 'location': 'Pretoria', 'source': 'Instagram Story'},
+    {'title': 'Shop Assistant', 'company': 'Spaza Shop', 'location': 'Soweto', 'source': 'Community Board'}
+]
+
+# Motivational Messages
+MOTIVATIONAL_MESSAGES = [
+    "Your potential is unlimited. Every expert was once a beginner.",
+    "South Africa needs your unique talents and perspective.",
+    "Small consistent actions lead to big transformations.",
+    "Your dreams are valid and achievable with the right plan.",
+    "Every challenge is an opportunity to grow stronger."
+]
+
+def analyze_skills_from_responses(responses):
+    """Extract skills from user responses using NLP"""
+    detected_skills = {}
     
-    if request.method == 'POST':
-        # Clear any previous session data
-        session.clear() 
-        
-        # Store the user's name and initialize the answers list
-        session['user_name'] = request.form.get('user_name', 'Young South African')
-        session['answers'] = []
-        
-        # Start the question flow
-        return redirect(url_for('profiler', q_index=0))
+    for response in responses:
+        response_lower = response.lower()
+        for skill, keywords in SKILLS_KEYWORDS.items():
+            score = sum(1 for keyword in keywords if keyword in response_lower)
+            detected_skills[skill] = detected_skills.get(skill, 0) + score
     
-    # GET request shows the starting page
+    # Normalize scores
+    max_score = max(detected_skills.values()) if detected_skills.values() else 1
+    normalized_skills = {skill: round((score / max_score) * 100) for skill, score in detected_skills.items()}
+    
+    return normalized_skills
+
+def recommend_pathway(skills_profile, user_data):
+    """AI Pathway Engine - Recommend best career path"""
+    # Score each pathway based on user skills
+    pathway_scores = {}
+    
+    for pathway_id, pathway in CAREER_PATHWAYS.items():
+        score = 0
+        
+        # Technology pathway scoring
+        if pathway_id == 'digital_economy':
+            score += skills_profile.get('technology', 0) * 2
+            score += skills_profile.get('analytical', 0) * 1.5
+            score += skills_profile.get('problem_solving', 0) * 1.5
+        
+        # Green economy scoring
+        elif pathway_id == 'green_economy':
+            score += skills_profile.get('hands_on', 0) * 2
+            score += skills_profile.get('problem_solving', 0) * 1.5
+            score += skills_profile.get('analytical', 0) * 1
+        
+        # Entrepreneurship scoring
+        elif pathway_id == 'entrepreneurship':
+            score += skills_profile.get('leadership', 0) * 2
+            score += skills_profile.get('sales', 0) * 2
+            score += skills_profile.get('communication', 0) * 1.5
+        
+        # Creative industries scoring
+        elif pathway_id == 'creative_industries':
+            score += skills_profile.get('creativity', 0) * 2
+            score += skills_profile.get('communication', 0) * 1.5
+            score += skills_profile.get('technology', 0) * 1
+        
+        pathway_scores[pathway_id] = score
+    
+    # Return top pathway
+    best_pathway_id = max(pathway_scores, key=pathway_scores.get)
+    return best_pathway_id, CAREER_PATHWAYS[best_pathway_id]
+
+def find_hidden_opportunities(user_location, skills_profile):
+    """Hidden Job Market Scanner"""
+    # Filter jobs by location and skills
+    relevant_jobs = []
+    
+    for job in HIDDEN_JOBS:
+        # Simple location matching
+        if user_location.lower() in job['location'].lower() or job['location'] == 'Multiple':
+            relevant_jobs.append(job)
+    
+    # If no location matches, return random selection
+    if not relevant_jobs:
+        relevant_jobs = random.sample(HIDDEN_JOBS, min(3, len(HIDDEN_JOBS)))
+    
+    return relevant_jobs[:3]
+
+@app.route('/')
+def index():
     return render_template('index.html')
 
-@app.route('/profiler/<int:q_index>', methods=['GET', 'POST'])
-def profiler(q_index):
-    """Route 2: Handles the 5 questions one by one."""
+@app.route('/signup', methods=['POST'])
+def signup():
+    """Quick Sign-Up Process"""
+    data = request.json
     
-    # The 5 questions defined for your NLP Profiler
-    QUESTIONS = [
-        "What are you good at, even if it's just a hobby or something you do for fun?",
-        "Describe a time you showed initiative or solved a problem for someone else (family, friend, community).",
-        "If you had R500 and 3 days, what would you try to do with it to make more money, or to improve your community?",
-        "What kind of environment do you prefer? Indoors, outdoors, or a mix of both?",
-        "What is the biggest challenge or obstacle you currently face in finding a job/getting skills?",
+    session['user'] = {
+        'name': data.get('name'),
+        'age': data.get('age'),
+        'location': data.get('location'),
+        'education_level': data.get('education_level'),
+        'signup_date': datetime.now().isoformat()
+    }
+    
+    return jsonify({'success': True, 'message': f"Welcome {data.get('name')}! Let's start your journey."})
+
+@app.route('/coach_chat', methods=['POST'])
+def coach_chat():
+    """First Chat with AI Coach"""
+    data = request.json
+    responses = data.get('responses', [])
+    
+    if not responses:
+        return jsonify({'questions': COACH_QUESTIONS})
+    
+    # Analyze responses and generate skills profile
+    skills_profile = analyze_skills_from_responses(responses)
+    
+    # Store in session
+    session['skills_profile'] = skills_profile
+    session['coach_responses'] = responses
+    
+    return jsonify({
+        'skills_profile': skills_profile,
+        'message': "Great! I've analyzed your responses and created your Skills Passport."
+    })
+
+@app.route('/generate_pathway', methods=['POST'])
+def generate_pathway():
+    """AI Pathway Engine Analysis"""
+    if 'skills_profile' not in session:
+        return jsonify({'error': 'Complete skills assessment first'}), 400
+    
+    skills_profile = session['skills_profile']
+    user_data = session.get('user', {})
+    
+    # Get recommended pathway
+    pathway_id, pathway_data = recommend_pathway(skills_profile, user_data)
+    
+    # Store pathway in session
+    session['recommended_pathway'] = {
+        'id': pathway_id,
+        'data': pathway_data,
+        'generated_date': datetime.now().isoformat()
+    }
+    
+    return jsonify({
+        'pathway': pathway_data,
+        'pathway_id': pathway_id,
+        'message': f"Based on your skills, I recommend the {pathway_data['name']}!"
+    })
+
+@app.route('/find_opportunities', methods=['POST'])
+def find_opportunities():
+    """Hidden Job Market Scanner"""
+    user_data = session.get('user', {})
+    skills_profile = session.get('skills_profile', {})
+    
+    opportunities = find_hidden_opportunities(
+        user_data.get('location', 'Johannesburg'), 
+        skills_profile
+    )
+    
+    return jsonify({
+        'opportunities': opportunities,
+        'message': "I found these hidden opportunities in your area!"
+    })
+
+@app.route('/wellness_support', methods=['POST'])
+def wellness_support():
+    """Mental Wellness AI Coach"""
+    data = request.json
+    mood = data.get('mood', 'neutral')
+    
+    support_messages = {
+        'stressed': "I understand you're feeling stressed. Remember, every challenge is temporary. Take deep breaths and focus on one small step at a time.",
+        'motivated': "That's amazing energy! Channel this motivation into your next learning goal. You're on the right path!",
+        'confused': "Feeling confused is normal when exploring new paths. Let's break down your goals into smaller, clearer steps.",
+        'excited': "Your excitement is contagious! This positive energy will help you overcome any obstacles ahead.",
+        'discouraged': "I hear you. Remember, every successful person faced setbacks. Your persistence will make the difference."
+    }
+    
+    message = support_messages.get(mood, random.choice(MOTIVATIONAL_MESSAGES))
+    
+    return jsonify({
+        'support_message': message,
+        'daily_motivation': random.choice(MOTIVATIONAL_MESSAGES),
+        'wellness_tips': [
+            "Set small daily goals",
+            "Celebrate small wins",
+            "Connect with supportive people",
+            "Practice gratitude daily"
+        ]
+    })
+
+@app.route('/find_peers', methods=['POST'])
+def find_peers():
+    """Peer Matching & Groups"""
+    user_pathway = session.get('recommended_pathway', {}).get('id', 'digital_economy')
+    user_location = session.get('user', {}).get('location', 'Johannesburg')
+    
+    # Simulated peer data
+    peers = [
+        {'name': 'Thabo M.', 'pathway': user_pathway, 'location': user_location, 'stage': 'Learning Phase', 'interests': 'Tech, Innovation'},
+        {'name': 'Nomsa K.', 'pathway': user_pathway, 'location': user_location, 'stage': 'Job Searching', 'interests': 'Problem Solving'},
+        {'name': 'Sipho N.', 'pathway': user_pathway, 'location': 'Near ' + user_location, 'stage': 'Starting Business', 'interests': 'Entrepreneurship'}
     ]
     
-    # Check for session data
-    if 'answers' not in session:
-        return redirect(url_for('start_profiler')) # Redirect if session is lost
+    return jsonify({
+        'peers': peers,
+        'study_groups': [
+            {'name': f'{CAREER_PATHWAYS[user_pathway]["name"]} Study Group', 'members': 12, 'location': user_location},
+            {'name': 'Career Development Circle', 'members': 8, 'location': 'Online'}
+        ]
+    })
 
-    if request.method == 'POST':
-        # 1. Save the answer from the submitted form
-        answer = request.form.get('user_input')
-        session['answers'].append(answer)
-        session.modified = True # Tell Flask the list has changed
-        
-        # 2. Check if all questions are answered
-        next_q_index = q_index + 1
-        if next_q_index >= len(QUESTIONS):
-            # If all done, analyze the profile and show results
-            return redirect(url_for('results'))
-        else:
-            # Continue to the next question
-            return redirect(url_for('profiler', q_index=next_q_index))
-
-    # GET request shows the current question
-    if q_index < len(QUESTIONS):
-        return render_template(
-            'profiler.html', 
-            question=QUESTIONS[q_index], 
-            q_number=q_index + 1,
-            total_questions=len(QUESTIONS)
-        )
-    
-    # Should not happen, but as a fallback:
-    return redirect(url_for('results'))
-
-@app.route('/results')
-def results():
-    """Route 3: Enhanced AI analysis and comprehensive pathway display."""
-    
-    if 'answers' not in session or not session['answers']:
-        return redirect(url_for('start_profiler'))
-
-    # AI Acceleration with enhanced features
-    pathway_data, scores = analyze_profile(session['answers'])
-    
-    # Store enhanced results in session
-    pathway_key = None
-    for key, data in PATHWAYS_DATA.items():
-        if data['name'] == pathway_data['name']:
-            pathway_key = key
-            break
-    
-    session['pathway_key'] = pathway_key or 'entrepreneurship'
-    session['current_success_rate'] = pathway_data['success_rate']
-    session['skills_profile'] = pathway_data['skills_profile']
-    session['pathway_data'] = pathway_data
-    session.modified = True
-
-    # Render enhanced result template
-    return render_template(
-        'result.html',
-        user_name=session['user_name'],
-        pathway_data=pathway_data,
-        scores=scores,
-        success_rate=pathway_data['success_rate']
-    )
-
-@app.route('/feedback', methods=['POST'])
-def feedback():
-    """Route 4: Enhanced feedback loop with reinforcement learning."""
-    
-    feedback_type = request.form.get('feedback_type')
-    pathway_key = session.get('pathway_key', 'entrepreneurship')
-    
-    if feedback_type == 'success':
-        # Update AI success rate using reinforcement learning
-        new_rate = update_pathway_success(pathway_key, success=True)
-        session['current_success_rate'] = new_rate
-        session.modified = True
-        
-        return render_template(
-            'feedback_success.html',
-            new_rate=new_rate,
-            pathway=PATHWAYS_DATA[pathway_key]['name']
-        )
-    elif feedback_type == 'not_helpful':
-        # Update AI with negative feedback
-        new_rate = update_pathway_success(pathway_key, success=False)
-        session['current_success_rate'] = new_rate
-        session.modified = True
-        
-        return render_template(
-            'feedback_improve.html',
-            pathway=PATHWAYS_DATA[pathway_key]['name']
-        )
-    
-    return redirect(url_for('results'))
-
-@app.route('/opportunities')
-def opportunities():
-    """Route 5: Display hidden job market opportunities."""
-    if 'pathway_data' not in session:
-        return redirect(url_for('start_profiler'))
-    
-    # Get opportunities from AI engine
-    economic_ai = EconomicChoicesAI()
-    skills_profile = session.get('skills_profile', {})
-    opportunities = economic_ai.find_hidden_opportunities(skills_profile)
-    
-    return render_template('opportunities.html', opportunities=opportunities)
-
-@app.route('/support')
-def support():
-    """Route 6: Emotional support and peer matching."""
-    if 'user_name' not in session:
-        return redirect(url_for('start_profiler'))
-    
-    support_ai_engine = SupportAI()
-    motivation = support_ai_engine.get_motivational_message()
-    peer_matches = support_ai_engine.find_peer_matches({}, session.get('user_location', 'general'))
-    
-    return render_template('support.html', 
-                         motivation=motivation, 
-                         peer_matches=peer_matches,
-                         user_name=session['user_name'])
-
-@app.route('/api/update_success', methods=['POST'])
-def api_update_success():
-    """API endpoint for real-time success rate updates."""
+@app.route('/update_progress', methods=['POST'])
+def update_progress():
+    """User Updates Progress"""
     data = request.json
-    pathway = data.get('pathway')
-    success = data.get('success', True)
     
-    if pathway in PATHWAYS_DATA:
-        new_rate = update_pathway_success(pathway, success)
-        return jsonify({'success': True, 'new_rate': new_rate})
+    progress_update = {
+        'type': data.get('type'),  # 'course_completed', 'job_applied', 'interview', 'hired'
+        'details': data.get('details'),
+        'date': datetime.now().isoformat()
+    }
     
-    return jsonify({'success': False, 'error': 'Invalid pathway'})
+    # Store progress
+    if 'progress_updates' not in session:
+        session['progress_updates'] = []
+    
+    session['progress_updates'].append(progress_update)
+    session.modified = True
+    
+    # Reinforcement Learning Simulation
+    pathway_id = session.get('recommended_pathway', {}).get('id')
+    if pathway_id and data.get('type') == 'hired':
+        # Increase success rate (simulated)
+        CAREER_PATHWAYS[pathway_id]['success_rate'] += 1
+    
+    return jsonify({
+        'message': 'Progress updated! This helps improve recommendations for other users.',
+        'total_updates': len(session.get('progress_updates', [])),
+        'reinforcement_learning': 'Your success helps train our AI to better help other youth!'
+    })
+
+@app.route('/dashboard')
+def dashboard():
+    """User Dashboard"""
+    return render_template('dashboard.html', 
+                         user=session.get('user'),
+                         skills_profile=session.get('skills_profile'),
+                         pathway=session.get('recommended_pathway'),
+                         progress=session.get('progress_updates', []))
 
 if __name__ == '__main__':
-    # Use a port that works well in hackathon environments
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    print("🧭 Youth Compass AI - Complete User Flow")
+    print("📱 Access at: http://localhost:5000")
+    print("🔄 Following the complete user journey flow")
+    app.run(debug=True, port=5000)
