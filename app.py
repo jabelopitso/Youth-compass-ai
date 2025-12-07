@@ -484,7 +484,22 @@ def dashboard():
                          financial_data=session.get('financial_data', {}))
 
 if __name__ == '__main__':
+    print("="*70)
     print("🧭 Youth Compass AI - Complete User Flow")
-    print("📱 Access at: http://localhost:5001")
-    print("🔄 Following the complete user journey flow")
-    app.run(debug=True, port=5001)
+    print("="*70)
+    print("\n📱 Access Points:")
+    print("   Main Platform:  http://localhost:5001")
+    print("   AI Chatbot:     http://localhost:5001/chat")
+    print("   Dashboard:      http://localhost:5001/dashboard")
+    print("\n💡 Press Ctrl+C to stop the server")
+    print("="*70)
+    print("\nStarting server...\n")
+    
+    try:
+        app.run(host='0.0.0.0', port=5001, debug=True)
+    except Exception as e:
+        print(f"\n❌ Error starting server: {e}")
+        print("\nTroubleshooting:")
+        print("1. Check if port 5001 is in use: lsof -ti:5001")
+        print("2. Kill existing process: lsof -ti:5001 | xargs kill -9")
+        print("3. Try a different port")
